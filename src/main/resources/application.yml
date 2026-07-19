@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/RealTimeChatApp}
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secretkey: zH5kF#nM9$aW2xS4yU7vB3jR8qL6tC1d
+  expiration: 3600000
+
+server:
+  port: 8081
