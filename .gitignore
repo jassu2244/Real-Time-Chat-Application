@@ -37,3 +37,10 @@ application-local.yml
 src/main/resources/application-local.yml
 .env
 .env.local
+
+# Node / Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+
