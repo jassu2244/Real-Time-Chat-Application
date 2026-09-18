@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { User, Lock, ArrowRight, MessageSquareCode } from 'lucide-react'
 
 export default function Login() {
   const { login, error } = useAuth()
@@ -14,46 +15,77 @@ export default function Login() {
     setLoading(true)
     const res = await login(username, password)
     setLoading(false)
-    if (res.ok) navigate('/')
+    if (res.ok) {
+      navigate('/')
+    }
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2 className="auth-title">Welcome Back</h2>
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label>Username</label>
-            <input 
-              className="form-input"
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
-              required 
-              autoComplete="username"
-            />
+    <div className="auth-wrapper">
+      <div className="auth-glow-blob" style={{ top: '10%', left: '15%' }} />
+      <div className="auth-glow-blob" style={{ bottom: '10%', right: '15%', opacity: 0.2 }} />
+
+      <div className="auth-card-modern">
+        <div className="auth-header">
+          <div className="auth-badge">
+            <MessageSquareCode size={16} />
+            <span>Pulse Messenger</span>
           </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input 
-              className="form-input"
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-              autoComplete="current-password"
-            />
+          <h1 className="auth-title">Welcome Back</h1>
+          <p className="auth-subtitle">Sign in to connect with your real-time rooms</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="auth-form-modern">
+          <div className="input-field-group">
+            <label className="input-label">Username</label>
+            <div className="input-box-wrapper">
+              <span className="input-icon-left">
+                <User size={18} />
+              </span>
+              <input 
+                className="modern-input"
+                value={username} 
+                onChange={(e) => setUsername(e.target.value)} 
+                placeholder="Enter your username"
+                required 
+                autoComplete="username"
+              />
+            </div>
           </div>
-          {error && <div style={{ color: '#e74c3c', textAlign: 'center', marginTop: '1rem' }}>{String(error)}</div>}
-          <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+
+          <div className="input-field-group">
+            <label className="input-label">Password</label>
+            <div className="input-box-wrapper">
+              <span className="input-icon-left">
+                <Lock size={18} />
+              </span>
+              <input 
+                className="modern-input"
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="••••••••"
+                required 
+                autoComplete="current-password"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="auth-error-banner">
+              {typeof error === 'string' ? error : error?.message || 'Login failed. Please verify credentials.'}
+            </div>
+          )}
+
+          <button type="submit" className="auth-submit-btn" disabled={loading}>
+            <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+            {!loading && <ArrowRight size={18} />}
           </button>
         </form>
-        <div className="auth-link">
-          No account? <Link to="/register">Create one here</Link>
-        </div>
-        <div className="auth-note">
-          <strong>Note:</strong> The backend uses HTTP-only cookies for security. 
-          For local development, make sure your browser accepts cookies from localhost.
+
+        <div className="auth-footer">
+          Don't have an account? 
+          <Link to="/register" className="auth-link-anchor">Create one here</Link>
         </div>
       </div>
     </div>

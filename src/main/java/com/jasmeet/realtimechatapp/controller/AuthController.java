@@ -43,7 +43,10 @@ public class AuthController {
                 .body(loginResponseDTO.getUser());
     }
     @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
+    public ResponseEntity<String> logout(Authentication authentication) {
+        if (authentication != null && authentication.getName() != null) {
+            userRepository.updateUserOnlineStatus(authentication.getName(), false);
+        }
         return authenticationService.logout();
     }
 

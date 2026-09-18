@@ -13,6 +13,11 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
+    @jakarta.annotation.PostConstruct
+    public void resetUsersOnlineStatusOnStartup() {
+        userRepository.resetAllUsersToOffline();
+    }
+
     public void setUserOnlineStatus(String username, boolean isOnline) {
         userRepository.updateUserOnlineStatus(username, isOnline);
     }

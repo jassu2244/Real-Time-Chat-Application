@@ -11,7 +11,9 @@
   "dependencies": {
     "@stomp/stompjs": "^7.0.0",
     "axios": "^1.7.7",
+    "canvas-confetti": "^1.9.4",
     "dayjs": "^1.11.13",
+    "lucide-react": "^1.47.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.2",

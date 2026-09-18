@@ -25,15 +25,18 @@ public class WebSocketListener {
         logger.info("Connected to web socket");
     }
 
+    @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = accessor.getSessionAttributes().get("username").toString();
-        userService.setUserOnlineStatus(username, false);
+        if (accessor.getSessionAttributes() != null && accessor.getSessionAttributes().get("username") != null) {
+            String username = accessor.getSessionAttributes().get("username").toString();
+            userService.setUserOnlineStatus(username, false);
 
-        System.out.println("User disconnected from web socket");
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessageType(MessageType.LEAVE);
-        chatMessage.setSender(username);
-        messagingTemplate.convertAndSend("/topic/public", chatMessage);
+            logger.info("User disconnected from web socket: {}", username);
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setMessageType(MessageType.LEAVE);
+            chatMessage.setSender(username);
+            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+        }
     }
 }

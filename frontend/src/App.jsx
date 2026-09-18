@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -8,49 +8,35 @@ import './styles/chat.css'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
-  if (loading) return <div className="loading">Loading...</div>
+  if (loading) {
+    return (
+      <div className="auth-wrapper" style={{ color: '#d2f54a', fontSize: '1.1rem', fontWeight: 600 }}>
+        <div className="auth-glow-blob" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#d2f54a', animation: 'limePulse 1s infinite' }} />
+          <span>Connecting to Pulse...</span>
+        </div>
+      </div>
+    )
+  }
   if (!user) return <Navigate to="/login" replace />
   return children
 }
 
-const Navbar = () => {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  return (
-    <nav className="navbar">
-      <Link to="/">🏠 Home</Link>
-      <div className="navbar-user">
-        {user ? (
-          <>
-            <span>Signed in as <b>{user.username}</b></span>
-            <button 
-              className="logout-btn"
-              onClick={async () => { await logout(); navigate('/login') }}
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        )}
-      </div>
-    </nav>
-  )
-}
-
 export default function App() {
   return (
-    <div>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route 
+        path="/" 
+        element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
