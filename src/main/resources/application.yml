@@ -1,18 +1,21 @@
 spring:
+  config:
+    import: "optional:classpath:application-local.yml"
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/RealTimeChatApp}
-    username: root
-    password: Pinglan@721
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
 jwt:
-  secretkey: zH5kF#nM9$aW2xS4yU7vB3jR8qL6tC1d
+  secretkey: ${JWT_SECRET}
   expiration: 3600000
 
 server:
-  port: 8081
+  port: ${PORT:8081}
+
