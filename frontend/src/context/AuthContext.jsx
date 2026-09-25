@@ -13,6 +13,9 @@ export const AuthProvider = ({ children }) => {
       const res = await api.get('/api/auth/getcurrentuser')
       setUser(res.data)
     } catch (e) {
+      if (!e.response || e.response.status === 503) {
+        console.error("db instance not working:", e.message || "DB unavailable")
+      }
       setUser(null)
     } finally {
       setLoading(false)
@@ -31,8 +34,30 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data)
       return { ok: true }
     } catch (e) {
-      setError(e.response?.data || 'Login failed')
-      return { ok: false, error: e }
+      const data = e.response?.data
+      const status = e.response?.status
+      const isDbDown =
+        status === 503 ||
+        data?.error === 'DATABASE_UNAVAILABLE' ||
+        e.code === 'ERR_NETWORK' ||
+        e.code === 'ECONNABORTED' ||
+        !e.response
+
+      if (isDbDown) {
+        console.error("db instance not working:", e.message || data?.message || "DB connection failed")
+      }
+
+      let errorMsg = 'Login failed'
+      if (data?.message) {
+        errorMsg = data.message
+      } else if (typeof data === 'string' && data.trim()) {
+        errorMsg = data
+      } else if (isDbDown) {
+        errorMsg = 'Database instance not working or backend unreachable. Please try again later.'
+      }
+
+      setError(errorMsg)
+      return { ok: false, error: errorMsg }
     }
   }
 
@@ -44,8 +69,21 @@ export const AuthProvider = ({ children }) => {
       const loginRes = await login(username, password)
       return loginRes
     } catch (e) {
-      setError(e.response?.data || 'Registration failed')
-      return { ok: false, error: e }
+      const data = e.response?.data
+      const isDbDown = e.response?.status === 503 || data?.error === 'DATABASE_UNAVAILABLE' || !e.response
+      if (isDbDown) {
+        console.error("db instance not working:", e.message || "DB connection failed")
+      }
+      let errorMsg = 'Registration failed'
+      if (data?.message) {
+        errorMsg = data.message
+      } else if (typeof data === 'string' && data.trim()) {
+        errorMsg = data
+      } else if (isDbDown) {
+        errorMsg = 'Database instance not working or backend unreachable. Please try again later.'
+      }
+      setError(errorMsg)
+      return { ok: false, error: errorMsg }
     }
   }
 

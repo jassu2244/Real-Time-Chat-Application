@@ -15,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.jasmeet.realtimechatapp.exceptions.InvalidUsernameException;
+import com.jasmeet.realtimechatapp.exceptions.UserNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,14 +29,18 @@ public class AuthenticationService {
     private final JwtService jwtService;
 
     public String register(RegisterRequestDTO registerRequestDTO) {
-        if(userRepository.existsByUsername(registerRequestDTO.getUsername())) {
+        String username = registerRequestDTO.getUsername() != null ? registerRequestDTO.getUsername().trim() : "";
+        if (username.contains("@")) {
+            throw new InvalidUsernameException("Username cannot contain '@'. Please choose a valid username.");
+        }
+        if(userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username is already in use");
         }
         if(userRepository.existsByEmail(registerRequestDTO.getEmail())) {
             throw new RuntimeException("Email is already in use");
         }
         User user = new User();
-        user.setUsername(registerRequestDTO.getUsername());
+        user.setUsername(username);
         user.setEmail(registerRequestDTO.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         user.setRole(Role.ROLE_USER);
@@ -43,11 +50,28 @@ public class AuthenticationService {
     }
 
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
-        User user = userRepository.findByUsername(loginRequestDTO.getUsername())
-                .orElseThrow(() -> new RuntimeException("Username not found"));
+        String username = loginRequestDTO.getUsername() != null ? loginRequestDTO.getUsername().trim() : "";
+        String password = loginRequestDTO.getPassword();
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
-                (loginRequestDTO.getUsername(), loginRequestDTO.getPassword()));
+        // 1. If user entered an email address instead of username
+        if (username.contains("@")) {
+            if (userRepository.existsByEmail(username)) {
+                throw new InvalidUsernameException("Please enter your valid username rather than your email address.");
+            } else {
+                throw new UserNotFoundException("Account not found. New user? Please sign up first.");
+            }
+        }
+
+        // 2. Check if username exists in database
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Account not found. New user? Please sign up first."));
+
+        // 3. Authenticate password
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (BadCredentialsException ex) {
+            throw new BadCredentialsException("Incorrect password. Please verify and try again.");
+        }
 
         String jwtToken = jwtService.generateToken(user);
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { User, Mail, Lock, ArrowRight, Sparkles } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Sparkles, AlertCircle } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
 export default function Register() {
@@ -9,13 +9,22 @@ export default function Register() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [clientError, setClientError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setClientError('')
+
+    const trimmedUser = username.trim()
+    if (trimmedUser.includes('@')) {
+      setClientError("Username cannot contain '@'. Please pick a regular username.")
+      return
+    }
+
     setLoading(true)
-    const res = await register(username, email, password)
+    const res = await register(trimmedUser, email.trim(), password)
     setLoading(false)
     if (res.ok) {
       try {
@@ -99,9 +108,10 @@ export default function Register() {
             </div>
           </div>
 
-          {error && (
-            <div className="auth-error-banner">
-              {typeof error === 'string' ? error : error?.message || 'Registration failed. Please try again.'}
+          {(clientError || error) && (
+            <div className="auth-error-banner" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              <span>{typeof (clientError || error) === 'string' ? (clientError || error) : (clientError || error)?.message || 'Registration failed. Please try again.'}</span>
             </div>
           )}
 

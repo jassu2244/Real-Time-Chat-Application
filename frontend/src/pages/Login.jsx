@@ -1,24 +1,41 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { User, Lock, ArrowRight, MessageSquareCode } from 'lucide-react'
+import { User, Lock, ArrowRight, MessageSquareCode, AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const { login, error } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [clientError, setClientError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
+  const handleUsernameChange = (e) => {
+    const val = e.target.value
+    setUsername(val)
+    if (clientError) setClientError('')
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setClientError('')
+
+    const trimmedUser = username.trim()
+    if (trimmedUser.includes('@')) {
+      setClientError('Please enter your valid username rather than your email address.')
+      return
+    }
+
     setLoading(true)
-    const res = await login(username, password)
+    const res = await login(trimmedUser, password)
     setLoading(false)
     if (res.ok) {
       navigate('/')
     }
   }
+
+  const displayError = clientError || error
 
   return (
     <div className="auth-wrapper">
@@ -45,12 +62,17 @@ export default function Login() {
               <input 
                 className="modern-input"
                 value={username} 
-                onChange={(e) => setUsername(e.target.value)} 
+                onChange={handleUsernameChange} 
                 placeholder="Enter your username"
                 required 
                 autoComplete="username"
               />
             </div>
+            {username.includes('@') && (
+              <span style={{ fontSize: '0.78rem', color: '#facc15', marginTop: '0.25rem', display: 'block' }}>
+                Note: Enter your username, not your email address.
+              </span>
+            )}
           </div>
 
           <div className="input-field-group">
@@ -71,9 +93,17 @@ export default function Login() {
             </div>
           </div>
 
-          {error && (
-            <div className="auth-error-banner">
-              {typeof error === 'string' ? error : error?.message || 'Login failed. Please verify credentials.'}
+          {displayError && (
+            <div className="auth-error-banner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{typeof displayError === 'string' ? displayError : displayError?.message || 'Login failed. Please verify credentials.'}</span>
+              </div>
+              {typeof displayError === 'string' && displayError.toLowerCase().includes('sign up') && (
+                <Link to="/register" style={{ color: '#d2f54a', textDecoration: 'underline', fontWeight: 600, fontSize: '0.85rem' }}>
+                  Create an account now →
+                </Link>
+              )}
             </div>
           )}
 
