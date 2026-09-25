@@ -99,7 +99,7 @@ export default function Login() {
                 <AlertCircle size={16} style={{ flexShrink: 0 }} />
                 <span>{typeof displayError === 'string' ? displayError : displayError?.message || 'Login failed. Please verify credentials.'}</span>
               </div>
-              {typeof displayError === 'string' && displayError.toLowerCase().includes('sign up') && (
+              {typeof displayError === 'string' && (displayError.toLowerCase().includes('sign up') || displayError.toLowerCase().includes('exist')) && (
                 <Link to="/register" style={{ color: '#d2f54a', textDecoration: 'underline', fontWeight: 600, fontSize: '0.85rem' }}>
                   Create an account now →
                 </Link>

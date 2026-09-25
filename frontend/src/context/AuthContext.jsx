@@ -48,12 +48,24 @@ export const AuthProvider = ({ children }) => {
       }
 
       let errorMsg = 'Login failed'
-      if (data?.message) {
-        errorMsg = data.message
+      if (isDbDown) {
+        errorMsg = 'Database instance not working or backend unreachable. Please try again later.'
+      } else if (data?.message) {
+        if (data.message.toLowerCase() === 'bad credentials') {
+          errorMsg = 'Wrong password. Please try again.'
+        } else {
+          errorMsg = data.message
+        }
+      } else if (data?.detail) {
+        errorMsg = data.detail
+      } else if (data?.error === 'USER_NOT_FOUND' || status === 404) {
+        errorMsg = 'User not exists. Please check your username or sign up.'
+      } else if (data?.error === 'BAD_CREDENTIALS' || status === 401) {
+        errorMsg = 'Wrong password. Please try again.'
+      } else if (data?.error === 'INVALID_USERNAME') {
+        errorMsg = 'Please enter your valid username rather than your email address.'
       } else if (typeof data === 'string' && data.trim()) {
         errorMsg = data
-      } else if (isDbDown) {
-        errorMsg = 'Database instance not working or backend unreachable. Please try again later.'
       }
 
       setError(errorMsg)
@@ -75,12 +87,14 @@ export const AuthProvider = ({ children }) => {
         console.error("db instance not working:", e.message || "DB connection failed")
       }
       let errorMsg = 'Registration failed'
-      if (data?.message) {
+      if (isDbDown) {
+        errorMsg = 'Database instance not working or backend unreachable. Please try again later.'
+      } else if (data?.message) {
         errorMsg = data.message
+      } else if (data?.detail) {
+        errorMsg = data.detail
       } else if (typeof data === 'string' && data.trim()) {
         errorMsg = data
-      } else if (isDbDown) {
-        errorMsg = 'Database instance not working or backend unreachable. Please try again later.'
       }
       setError(errorMsg)
       return { ok: false, error: errorMsg }

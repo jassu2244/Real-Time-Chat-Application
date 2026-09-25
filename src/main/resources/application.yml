@@ -18,4 +18,6 @@ jwt:
 
 server:
   port: ${PORT:8081}
+  error:
+    include-message: always
 

@@ -22,7 +22,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUserNotFound(UserNotFoundException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", "USER_NOT_FOUND");
-        response.put("message", ex.getMessage());
+        response.put("message", ex.getMessage() != null ? ex.getMessage() : "User not exists. Please check your username or sign up.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleSpringUsernameNotFound(org.springframework.security.core.userdetails.UsernameNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "USER_NOT_FOUND");
+        response.put("message", "User not exists. Please check your username or sign up.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -38,9 +46,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", "BAD_CREDENTIALS");
-        response.put("message", ex.getMessage() != null && !ex.getMessage().equalsIgnoreCase("Bad credentials")
-                ? ex.getMessage()
-                : "Incorrect password. Please verify and try again.");
+        String msg = ex.getMessage();
+        if (msg == null || msg.equalsIgnoreCase("Bad credentials")) {
+            msg = "Wrong password. Please try again.";
+        }
+        response.put("message", msg);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 

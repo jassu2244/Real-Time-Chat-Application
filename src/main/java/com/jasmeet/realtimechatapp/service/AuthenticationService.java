@@ -58,19 +58,19 @@ public class AuthenticationService {
             if (userRepository.existsByEmail(username)) {
                 throw new InvalidUsernameException("Please enter your valid username rather than your email address.");
             } else {
-                throw new UserNotFoundException("Account not found. New user? Please sign up first.");
+                throw new UserNotFoundException("User not exists. Please check your username or sign up.");
             }
         }
 
         // 2. Check if username exists in database
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Account not found. New user? Please sign up first."));
+                .orElseThrow(() -> new UserNotFoundException("User not exists. Please check your username or sign up."));
 
         // 3. Authenticate password
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (BadCredentialsException ex) {
-            throw new BadCredentialsException("Incorrect password. Please verify and try again.");
+            throw new BadCredentialsException("Wrong password. Please try again.");
         }
 
         String jwtToken = jwtService.generateToken(user);
