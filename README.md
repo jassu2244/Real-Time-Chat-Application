@@ -131,7 +131,7 @@ The backend connects to MySQL by default. You can configure credentials directly
 | `spring.datasource.username` | `root` | Database Username |
 | `spring.datasource.password` | `1234` | Database Password |
 | `server.port` | `8081` | Spring Boot Server Port |
-| `jwt.secretkey` | `zH5kF#nM9$aW2xS4yU7vB3jR8qL6tC1d` | Secret Key used for signing JWT tokens |
+| `jwt.secretkey` | `` | Secret Key used for signing JWT tokens |
 | `jwt.expiration` | `3600000` (1 hour) | JWT token lifespan in milliseconds |
 
 ### Frontend Configuration (`frontend/vite.config.js`)
